@@ -1,0 +1,6 @@
+@Sonrisa.EventAlertSystem.Api_HostAddress = http://localhost:5226
+
+GET {{Sonrisa.EventAlertSystem.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
