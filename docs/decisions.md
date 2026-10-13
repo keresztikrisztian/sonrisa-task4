@@ -178,3 +178,104 @@ Users can manage alert rules. The administration view displays events and notifi
 **Rationale:** Authentication, infrastructure, retention policies, and delivery credentials are not fully specified.
 
 **Consequence:** Production readiness remains explicitly out of scope.
+
+---
+
+## ADR-012: Alert Matching Semantics
+
+**Status:** Accepted
+
+**Decision:** Use case-insensitive category and keyword matching. Category and keyword conditions use AND logic, while multiple keywords use OR logic.
+
+An empty category matches any category. An empty keyword list imposes no keyword restriction. Disabled or logically deleted rules never match.
+
+**Rationale:** Simple, predictable, and testable matching behavior is sufficient for the MVP.
+
+**Deferred:** Advanced rule expressions and AI-based relevance scoring.
+
+---
+
+## ADR-013: Duplicate Event Handling
+
+**Status:** Accepted
+
+**Decision:** Identify duplicate events using a fingerprint generated from the normalized event category, title, description, and occurrence time.
+
+If an identical event is submitted again, the API returns the existing event with a duplicate indicator.
+
+Duplicate submissions must not create additional notification deliveries.
+
+Enforce event fingerprint uniqueness and delivery uniqueness at the database level.
+
+**Rationale:** Prevents repeated event processing and unnecessary duplicate notifications while keeping the MVP implementation simple.
+
+**Limitation:** Two genuinely distinct events with identical fingerprint fields may be treated as duplicates.
+
+---
+
+## ADR-014: Logical Rule Deletion
+
+**Status:** Accepted
+
+**Decision:** Use logical deletion for alert rules. Deleted rules must not participate in future event matching or generate new notifications.
+
+Preserve existing notification delivery records and their relationship to deleted rules.
+
+**Rationale:** Maintains notification history and avoids accidental loss of audit information.
+
+---
+
+## ADR-015: Demo Identity Handling
+
+**Status:** Accepted
+
+**Decision:** Use predefined `demo-user` and `demo-admin` identities for local demonstration.
+
+The frontend sends the selected identity through the `X-Demo-Identity` HTTP header. The backend validates the identity and enforces the corresponding demo role.
+
+**Rationale:** Enables demonstration of user and administration workflows without implementing a production authentication system.
+
+**Restriction:** This mechanism is not secure authentication and must not be used in a publicly deployed application.
+
+---
+
+## ADR-016: Notification Retry Policy
+
+**Status:** Accepted
+
+**Decision:** Allow a maximum of three notification delivery attempts, including the initial attempt.
+
+Retry transient failures with bounded backoff. Treat permanent failures as terminal and mark deliveries as `Failed`.
+
+Persist delivery attempts and recover interrupted processing after application restart.
+
+**Rationale:** Provides basic resilience without introducing a message broker or complex distributed processing.
+
+**Limitation:** Exactly-once external delivery is not guaranteed.
+
+---
+
+## ADR-017: Email and Slack Delivery
+
+**Status:** Accepted
+
+**Decision:** Use SMTP for email delivery and Slack Incoming Webhooks for Slack notifications.
+
+Use recording mode by default for local demonstrations. Distinguish simulated delivery (`Recorded`) from successful live sending (`Sent`).
+
+When live delivery is configured, missing credentials must produce an explicit configuration error rather than silently falling back to recording mode.
+
+**Rationale:** Supports both requested notification channels while allowing development and testing without external credentials.
+
+---
+
+## ADR-018: Database Migration Strategy
+
+**Status:** Accepted
+
+**Decision:** Manage the SQLite database schema using Entity Framework Core migrations.
+
+Commit migration files to Git and apply migrations explicitly during local setup rather than automatically at application startup.
+
+**Rationale:** Keeps schema changes version-controlled, reviewable, and reproducible.
+
