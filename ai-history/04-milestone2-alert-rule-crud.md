@@ -35,6 +35,6 @@ It is a checkpoint for the Alert Rule CRUD portion only. Event ingestion, event 
 
 ## 5. Evidence and Provenance
 
-This is a concise summary of the implementation and validation recorded in the current Copilot-assisted work. Existing `01`–`03` history files, including the original Milestone 1 conversation export, were preserved. No original Milestone 2 transcript export was present in the repository, so this summary does not claim to reproduce prompts, tool calls, or a verbatim transcript.
+This remains a concise summary of the implementation and validation. The original repository JSON exports were preserved. A readable transcript was later recovered from the local VS Code session archive: [Milestone 2 alert-rule CRUD conversation](transcripts/03-milestone2-alert-rule-crud.md). The archive contains the prompts, visible Copilot responses, tool names/arguments, and completion status; detailed tool result payloads are not present and require manual VS Code export for complete raw-output fidelity.
 
 The checkpoint validation details are also recorded in [`docs/validation-log.md`](../docs/validation-log.md). No commit or push was made.

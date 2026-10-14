@@ -25,6 +25,7 @@ builder.Services.AddDbContext<EventAlertDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("EventAlertDatabase")));
 builder.Services.AddSingleton<AlertMatchingService>();
 builder.Services.AddSingleton<DemoIdentityRegistry>();
+builder.Services.AddSingleton<INotificationDeliveryRecorder, RecordingNotificationDeliveryRecorder>();
 builder.Services.AddHostedService<NotificationDeliveryRecordingWorker>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

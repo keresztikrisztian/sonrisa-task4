@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sonrisa.EventAlertSystem.Api.Domain;
+using Sonrisa.EventAlertSystem.Api.Application;
 using Sonrisa.EventAlertSystem.Api.Infrastructure.Persistence;
 using Xunit;
 
@@ -252,20 +253,23 @@ public sealed class AlertRulesAuthorizationApiTests
 internal sealed class AlertRulesApiFactory : WebApplicationFactory<Program>
 {
     private readonly SqliteConnection _connection = new("Data Source=:memory:");
+    private readonly INotificationDeliveryRecorder? _deliveryRecorder;
 
     public static WebApplicationFactoryClientOptions TestClientOptions => new()
     {
         BaseAddress = new Uri("https://localhost")
     };
 
-    private AlertRulesApiFactory()
+    private AlertRulesApiFactory(INotificationDeliveryRecorder? deliveryRecorder)
     {
+        _deliveryRecorder = deliveryRecorder;
         _connection.Open();
     }
 
-    public static async Task<AlertRulesApiFactory> CreateAsync()
+    public static async Task<AlertRulesApiFactory> CreateAsync(
+        INotificationDeliveryRecorder? deliveryRecorder = null)
     {
-        var factory = new AlertRulesApiFactory();
+        var factory = new AlertRulesApiFactory(deliveryRecorder);
         try
         {
             await factory.InitializeDatabaseAsync();
@@ -295,6 +299,11 @@ internal sealed class AlertRulesApiFactory : WebApplicationFactory<Program>
             services.RemoveAll<DbContextOptions<EventAlertDbContext>>();
             services.RemoveAll<EventAlertDbContext>();
             services.AddDbContext<EventAlertDbContext>(options => options.UseSqlite(_connection));
+            if (_deliveryRecorder is not null)
+            {
+                services.RemoveAll<INotificationDeliveryRecorder>();
+                services.AddSingleton(_deliveryRecorder);
+            }
         });
     }
 

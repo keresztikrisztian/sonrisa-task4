@@ -156,3 +156,30 @@ Evidence summary: [`ai-history/04-milestone2-alert-rule-crud.md`](../ai-history/
 - Frontend was not modified or validated. The initial implementation checkpoint was uncommitted; the final review and requested commit/push are a separate follow-up.
 
 Evidence summary: [`ai-history/05-milestone2-event-notification.md`](../ai-history/05-milestone2-event-notification.md). This is a factual implementation summary, not a reconstructed transcript.
+
+## Milestone 3 Notification Delivery Reliability
+
+### Scope and Implementation
+
+- Added a recording-only delivery operation behind a small injectable interface. The default implementation makes no network calls and requires no Email or Slack credentials; successful simulation remains `Recorded`, never `Sent`.
+- The worker atomically claims due `Pending` rows in the database and increments `AttemptCount` as it claims. Transient failures are retried with persisted exponential delays of one and two seconds, capped at 30 seconds, with at most three total attempts. Exhausted retries and explicitly permanent failures become terminal `Failed` rows with a persisted error and no next-attempt time.
+- Stale `Processing` rows older than one minute are recovered. Rows below the attempt limit return to `Pending`; rows already at the limit become `Failed`. Conditional database updates prevent concurrent workers from claiming the same pending row. Existing delivery uniqueness and event deduplication remain unchanged; no schema migration was needed.
+- Email and Slack remain in recording mode. No real transports, external calls, credentials, broker, or new package dependencies were added.
+
+### TDD and Validation Evidence
+
+- Added focused tests for successful recording, transient retry and subsequent success, retry exhaustion at three attempts, immediate permanent failure, stale `Processing` recovery, and concurrent worker claims. The first focused run was red because the recorder abstraction did not yet exist; after implementation, all six focused tests passed.
+- A requested five-run repetition initially failed on `ConcurrentWorkers_ClaimDeliveryOnlyOnce`, leaving the row `Processing` at attempt one. Investigation identified a test teardown race: after releasing the blocking recorder, the test immediately stopped the second worker, which could cancel the owner's final `Recorded` update. The test now waits for persisted `Recorded` before stopping that worker; no timeout was increased.
+- After the test correction, the complete worker test class passed **five consecutive runs**, each **6 succeeded, 0 failed, 0 skipped**.
+- `dotnet test backend/Sonrisa.EventAlertSystem.slnx`: **116 succeeded, 0 failed, 0 skipped**.
+- `dotnet build backend/Sonrisa.EventAlertSystem.slnx`: succeeded after the correction.
+- `git diff --check`: passed.
+
+### Limitations
+
+- Recovery intentionally waits until a `Processing` row has been stale for one minute, plus up to one worker polling interval. It uses `UpdatedAtUtc` as the persisted staleness marker and does not add a lease column.
+- Exactly-once external delivery is not guaranteed by the accepted ADR. This milestone performs no external delivery, so the recording adapter has no external side effect.
+- Unclassified exceptions are treated as retryable; adapters can mark a `NotificationDeliveryException` permanent to stop retries immediately.
+- Frontend behavior was not changed or validated.
+
+Evidence summary: [`ai-history/06-milestone3-notification-reliability.md`](../ai-history/06-milestone3-notification-reliability.md). This is a factual implementation summary, not a reconstructed transcript.

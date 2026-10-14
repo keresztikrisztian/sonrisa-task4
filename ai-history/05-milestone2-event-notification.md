@@ -39,4 +39,4 @@ The scope included event submission and deduplication, matching and atomic notif
 - The simultaneous duplicate HTTP race is covered using a deterministic database-command barrier; it does not depend on sleep-based race timing.
 - Restart recovery for `Processing`, retry policy, and actual Email/Slack transports remain deferred to Milestone 3 as required by ADR-024.
 - No frontend files were changed. The original implementation checkpoint was uncommitted; final review and the requested commit/push are tracked separately.
-- No original transcript export was created or available for this work. This file is a factual session summary and does not claim to reproduce a transcript.
+- A readable transcript was later recovered from the local VS Code session archive: [Milestone 2 event and notification conversation](transcripts/04-milestone2-event-and-notification.md). It preserves all three prompts and visible Copilot responses, along with tool names/arguments and completion status. Detailed tool result payloads are absent from that archive and require manual VS Code export for complete raw-output fidelity.

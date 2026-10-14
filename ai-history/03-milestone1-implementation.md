@@ -2,7 +2,7 @@
 
 ## 1. Session Objective and Scope
 
-This continuous GitHub Copilot Agent session implemented and validated Milestone 1 of the Sonrisa Event Alert System: domain entities, SQLite persistence with Entity Framework Core, deterministic alert matching, a static demo identity registry, an initial migration, and focused backend tests. The primary evidence is the original conversation export, [`03-milestone1-implementation.json`](03-milestone1-implementation.json), which contains the implementation and subsequent human-review exchanges.
+This continuous GitHub Copilot Agent session implemented and validated Milestone 1 of the Sonrisa Event Alert System: domain entities, SQLite persistence with Entity Framework Core, deterministic alert matching, a static demo identity registry, an initial migration, and focused backend tests. The primary evidence is the original conversation export, [`03-milestone1-implementation.json`](03-milestone1-implementation.json), which contains the implementation and subsequent human-review exchanges. Readable transcripts are available for the initial session and the implementation/review session: [initial session](transcripts/01-milestone1-initial-session.md) and [review and completion](transcripts/02-milestone1-review-and-completion.md).
 
 The session was limited to Milestone 1. It did not add alert/event API endpoints, notification sending, background processing, production authentication, or frontend changes.
 
