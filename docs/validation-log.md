@@ -124,3 +124,35 @@ This checkpoint covers the public demo identity lookup, demo identity authentica
 - **Commit/push:** Not performed; this checkpoint is awaiting developer review.
 
 Evidence summary: [`ai-history/04-milestone2-alert-rule-crud.md`](../ai-history/04-milestone2-alert-rule-crud.md). The existing Milestone 1 conversation export and summary were preserved. No original Milestone 2 transcript export was present in `ai-history`; the new file is a factual summary, not a reconstructed transcript.
+
+## Milestone 2 Event and Notification Recording Slice
+
+### Scope and Implementation
+
+- **Scope:** Completed the backend Milestone 2 event submission/query, notification-delivery recording, and delivery-status query work. No frontend changes, live transports, retries, or processing-state restart recovery were added.
+- **Event submission:** Added admin-only `POST /api/events` with strict field and explicit-offset timestamp validation, preservation of submitted text, UTC timestamp persistence, and the ADR-022 versioned canonical SHA-256 fingerprint.
+- **Atomic matching:** Event and all deliveries for matched active rules and configured Email/Slack channels are saved in one transaction. Duplicate fingerprint submissions return the existing event with `200` and create no new deliveries; only the specific event fingerprint uniqueness violation is treated as a duplicate. Other SQLite uniqueness conflicts return `409`.
+- **Recording worker:** Added a database polling `BackgroundService` that persists `Pending` then `Processing` then `Recorded`. No network calls are made; `AttemptCount` stays zero and `SentAtUtc` remains null.
+- **Admin queries:** Added paginated event list and detail routes and paginated notification-delivery queries, with the accepted filters, stable ordering, explicit response DTOs, and admin authorization.
+
+### TDD and Validation Evidence
+
+- Event submission tests were added first. The initial focused run returned `404` for the absent route; after implementation, the focused submission suite passed **15/15**.
+- A fixed ADR-022 digest vector and a SQLite trigger that forces delivery insertion to fail passed, confirming the expected fingerprint and that neither event nor delivery persists after a failed transaction. This focused run passed **17/17**.
+- Event/delivery query and worker tests were added before those APIs and worker existed; the initial focused run was RED. After implementation and correction of a test fixture that violated the existing event/rule/channel unique index, the query/worker slice passed **15/15**.
+- The combined new event, fingerprint, query, and worker tests passed **32/32**.
+- The first complete-suite run exposed one timing failure with deliveries still `Pending` under parallel test load. The worker polling interval was changed to one second; the subsequent complete suite passed **110 succeeded, 0 failed, 0 skipped**.
+- Final ADR-026 review added a deterministic file-backed SQLite integration test with separate connections and a command-interceptor barrier that holds both fingerprint lookups until both have executed. The concurrent submissions returned one `201` and one duplicate `200`, shared one event ID, and persisted exactly one Email and one Slack delivery. Focused result: **1 passed**.
+- Exception review confirmed that only SQLite unique error `2067` naming `Events.Fingerprint` becomes a duplicate; other primary/unique conflicts return `409`, while a forced non-unique SQLite trigger failure remains an error and rolls back the event and deliveries.
+- Final backend suite after concurrency coverage: **111 succeeded, 0 failed, 0 skipped**.
+- `dotnet build backend/Sonrisa.EventAlertSystem.slnx --no-restore` succeeded.
+- `git diff --check` passed.
+
+### Limitations and Review Notes
+
+- The test host clears external logging providers so Windows Event Log does not interfere with `WebApplicationFactory` diagnostics.
+- Concurrent fingerprint deduplication is exercised with a deterministic barrier and separate file-backed SQLite connections; no timing-based race assertion is used.
+- `Processing` recovery after restart, bounded retries, and live Email/Slack delivery remain Milestone 3 work under ADR-024.
+- Frontend was not modified or validated. The initial implementation checkpoint was uncommitted; the final review and requested commit/push are a separate follow-up.
+
+Evidence summary: [`ai-history/05-milestone2-event-notification.md`](../ai-history/05-milestone2-event-notification.md). This is a factual implementation summary, not a reconstructed transcript.

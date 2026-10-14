@@ -7,6 +7,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sonrisa.EventAlertSystem.Api.Domain;
 using Sonrisa.EventAlertSystem.Api.Infrastructure.Persistence;
@@ -289,6 +290,7 @@ internal sealed class AlertRulesApiFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureTestServices(services =>
         {
+            services.AddLogging(logging => logging.ClearProviders());
             services.RemoveAll<IDbContextOptionsConfiguration<EventAlertDbContext>>();
             services.RemoveAll<DbContextOptions<EventAlertDbContext>>();
             services.RemoveAll<EventAlertDbContext>();
