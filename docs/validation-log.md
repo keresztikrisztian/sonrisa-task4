@@ -90,3 +90,37 @@ The detailed implementation plan will be requested in the next AI session. No im
 - **Frontend:** Frontend validation was not performed because it is outside Milestone 1 scope.
 - **Evidence:** `ai-history/03-milestone1-implementation.json` (continuous Copilot Agent session, including human review and corrective actions).
 - **Final developer verification:** The developer independently executed `dotnet build backend/Sonrisa.EventAlertSystem.slnx` and `dotnet test backend/Sonrisa.EventAlertSystem.slnx` after the human review. Both commands completed successfully; all 17 backend tests passed.
+
+## Milestone 2 Alert Rule CRUD Checkpoint (Steps 1A–1E)
+
+This checkpoint covers the public demo identity lookup, demo identity authentication and role authorization, and alert-rule list/create/update/logical-delete API operations. It does not complete the remaining Milestone 2 event ingestion and notification delivery work. The accepted boundaries are recorded in ADR-019 through ADR-026; those decisions were not changed during this checkpoint closeout.
+
+### TDD Sessions
+
+- **Step 1A – Demo identity lookup:** Added `WebApplicationFactory` integration coverage before implementing `GET /api/demo-identities`. RED: 2 tests failed with `404 NotFound` because the route was absent. GREEN: 2 focused tests passed; the complete backend suite passed with 19 tests. The test host was subsequently anchored on the actual `Program` entry point, and both focused identity tests plus the 19-test suite passed again.
+- **Step 1B – Authentication and rule-list authorization:** Added integration coverage for missing/unknown identities, admin role denial, user access, case-insensitive canonical ownership, owner/deleted filtering, and public identity lookup with an unknown header. RED: 9 tests total, 6 failed and 3 passed; the protected route returned `404`. GREEN: all 9 focused tests passed; the complete backend suite passed with 26 tests.
+- **Step 1B contract correction – Paginated rule listing:** Human review identified that `GET /api/alert-rules` returned a raw array rather than ADR-025's page envelope. RED: 18 tests total, 12 failed and 6 passed; list responses had the wrong shape and invalid pagination returned `200`. GREEN: all 18 focused tests passed; the complete backend suite passed with 35 tests. Coverage verifies default and explicit pagination, count/filter order, stable ordering, requested-page boundaries, and invalid query values.
+- **Step 1C – Rule creation:** Added isolated POST integration tests for defaults, explicit empty collections, field validation, trimmed/unique keywords, channels, owner derivation, response DTO shape, and persisted child rows. RED: 12 tests failed with `405 Method Not Allowed`; compilation succeeded. A test response-stream reuse issue was corrected before final green validation. GREEN: 16 focused tests passed; the complete backend suite passed with 51 tests.
+- **Step 1D – Full-replacement rule update:** Added tests for replacement and clearing of child collections, preserved ID/owner/creation time, updated timestamp, authorization, not-found cases, and validation. RED: 21 tests total, 18 failed and 3 passed; PUT was absent. One test's assumption about child-array ordering was removed because ADR-025 does not define that ordering. GREEN: 21 focused tests passed; the complete backend suite passed with 72 tests.
+- **Step 1E – Logical rule deletion:** Added tests for authorization, missing/already-deleted/non-owned rules, `204 No Content`, GET exclusion, PUT returning `404`, and preservation of rule children and existing delivery history. RED: 6 tests failed with `405 Method Not Allowed`; compilation succeeded. GREEN: 6 focused tests passed; the complete backend suite passed with 78 tests.
+
+### Human Review and Corrections
+
+- Human review required replacing the unrelated weather-controller test-host anchor with `WebApplicationFactory<Program>`; the standard public partial `Program` declaration was added without changing startup behavior.
+- Review identified the pagination response mismatch, which was corrected before proceeding beyond the protected GET endpoint.
+- The test factory option was renamed from `ClientOptions` to `TestClientOptions` to remove compiler warning CS0108.
+- EF Core multiple-collection query warnings encountered while loading keyword/channel collections were addressed with split-query behavior on the affected queries and test inspection.
+- TDD test-harness issues (response stream reuse and an absent test namespace import) were corrected before considering the corresponding RED results valid.
+
+### Final Checkpoint Validation
+
+- **Focused tests:** Step 1E suite passed: 6 succeeded, 0 failed, 0 skipped.
+- **Complete backend suite:** `dotnet test backend/Sonrisa.EventAlertSystem.slnx` passed: 78 succeeded, 0 failed, 0 skipped.
+- **Solution build:** `dotnet build backend/Sonrisa.EventAlertSystem.slnx` succeeded.
+- **Whitespace check:** `git diff --check` passed.
+- **Warnings:** No warnings were reported by the final focused DELETE run, complete backend test run, or solution build.
+- **Frontend:** Not changed or validated in this checkpoint.
+- **Remaining Milestone 2 work:** Event submission/querying, matching-to-delivery orchestration, asynchronous delivery processing, and delivery status APIs remain incomplete.
+- **Commit/push:** Not performed; this checkpoint is awaiting developer review.
+
+Evidence summary: [`ai-history/04-milestone2-alert-rule-crud.md`](../ai-history/04-milestone2-alert-rule-crud.md). The existing Milestone 1 conversation export and summary were preserved. No original Milestone 2 transcript export was present in `ai-history`; the new file is a factual summary, not a reconstructed transcript.
