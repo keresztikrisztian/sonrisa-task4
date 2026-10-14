@@ -1,12 +1,19 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { IdentityService } from './core/identity.service';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   selector: 'app-root',
   styleUrl: './app.scss',
-  templateUrl: './app.html',
+  templateUrl: './shell.html',
 })
-export class App {
-  protected readonly title = signal('sonrisa-event-alert-system-frontend');
+export class App implements OnInit {
+  protected readonly identity = inject(IdentityService);
+
+  ngOnInit(): void { this.identity.loadIdentities(); }
+
+  protected selectIdentity(event: Event): void {
+    this.identity.select((event.target as HTMLSelectElement).value);
+  }
 }

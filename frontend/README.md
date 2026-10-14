@@ -1,16 +1,33 @@
-# SonrisaEventAlertSystemFrontend
+# Sonrisa Event Alert System Frontend
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.2.
 
 ## Development server
 
-To start a local development server, run:
+Run the backend with its HTTPS launch profile from the repository root so the configured Angular proxy can reach it:
 
-```bash
-ng serve
+```powershell
+dotnet run --project backend/Sonrisa.EventAlertSystem.Api --launch-profile https
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Initialize the local database once from the API project directory:
+
+```powershell
+cd backend/Sonrisa.EventAlertSystem.Api
+dotnet ef database update
+```
+
+Then start Angular in a second terminal:
+
+```powershell
+cd frontend
+npm ci
+npm start
+```
+
+Open `http://localhost:4200`. The development proxy forwards `/api` to `https://localhost:7126`; certificate validation is disabled only for this local proxy. Apply the backend EF Core migrations explicitly before using the database-backed screens.
+
+The selected `demo-user` or `demo-admin` identity is stored in local storage and sent as `X-Demo-Identity`. This demo mechanism is not suitable for public deployment.
 
 ## Code scaffolding
 

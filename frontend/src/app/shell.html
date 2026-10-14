@@ -1,0 +1,14 @@
+<div class="application">
+  <header class="topbar">
+    <a class="brand" [routerLink]="identity.current()?.role === 'Admin' ? '/admin' : '/rules'" aria-label="Sonrisa home"><span class="brand-mark" aria-hidden="true">S</span><span><strong>Sonrisa</strong><small>EVENT ALERTS</small></span></a>
+    <nav class="primary-nav" aria-label="Main navigation">
+      @if (identity.current()?.role === 'User') { <a routerLink="/rules" routerLinkActive="active">My rules</a> }
+      @if (identity.current()?.role === 'Admin') { <a routerLink="/admin" routerLinkActive="active">Administration</a> }
+    </nav>
+    <label class="identity-picker"><span>DEMO IDENTITY</span><select [value]="identity.current()?.id ?? ''" (change)="selectIdentity($event)" [disabled]="identity.loading() || identity.identities().length === 0">
+      @for (item of identity.identities(); track item.id) { <option [value]="item.id">{{ item.displayName }}</option> }
+    </select></label>
+  </header>
+  @if (identity.error()) { <div class="global-error" role="alert">{{ identity.error() }}</div> }
+  <main class="page-frame"><router-outlet /></main>
+</div>

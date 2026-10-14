@@ -1,0 +1,37 @@
+<section class="page-heading"><div><p class="eyebrow">SYSTEM OVERSIGHT</p><h1>Administration</h1><p class="lede">Submit events and inspect their notification outcomes.</p></div>@if (identity.current()?.role === 'Admin') { <button class="button button-quiet" type="button" (click)="refresh()" [disabled]="eventsLoading() || deliveriesLoading()">Refresh data</button> }</section>
+@if (identity.loading()) { <section class="state-panel"><span class="loader"></span><p>Loading demo identities...</p></section> }
+@else if (identity.current()?.role !== 'Admin') { <section class="state-panel"><span class="state-icon">Admin</span><h2>Administrator identity required</h2><p>Choose Demo Administrator from the identity selector to access event and delivery operations.</p></section> }
+@else {
+  @if (error()) { <div class="error-banner" role="alert">{{ error() }}</div> }
+  @if (notice()) { <div class="notice-banner" role="status">{{ notice() }}</div> }
+  <section class="submit-section" aria-labelledby="submit-title"><div class="section-title"><div><p class="eyebrow">INGESTION</p><h2 id="submit-title">Submit an event</h2></div><span class="section-count">ADMIN ONLY</span></div>
+    <form class="event-form" [formGroup]="form" (ngSubmit)="submitEvent()" novalidate>
+      <label>Category<input formControlName="category" maxlength="100" placeholder="e.g. Transport"><small>@if (form.controls.category.touched && form.controls.category.invalid) { Category is required; use up to 100 characters. }</small></label>
+      <label>Title<input formControlName="title" maxlength="300" placeholder="Short event headline"><small>@if (form.controls.title.touched && form.controls.title.invalid) { Title is required; use up to 300 characters. }</small></label>
+      <label>Occurred at<input type="datetime-local" formControlName="occurredAt"><small>@if (occurredAtError()) { Enter a valid date and time. } @else { Local time is submitted as UTC. }</small></label>
+      <label class="wide-field">Description<textarea formControlName="description" maxlength="4000" rows="2" placeholder="What happened?"></textarea><small>@if (form.controls.description.touched && form.controls.description.hasError('maxlength')) { Maximum 4,000 characters. }</small></label>
+      <div class="submit-action"><button class="button button-primary" type="submit" [disabled]="submitting()">{{ submitting() ? 'Submitting…' : 'Submit event' }}</button></div>
+    </form>
+  </section>
+  <section class="monitor-grid">
+    <div class="monitor-column event-column"><div class="section-title"><div><p class="eyebrow">RECENT ACTIVITY</p><h2>Events <span class="section-count">{{ eventTotal() }}</span></h2></div></div>
+      @if (eventsLoading()) { <div class="small-state"><span class="loader"></span>Loading events...</div> }
+      @else if (eventsError()) { <div class="small-state api-error" role="alert">{{ eventsError() }} <button class="text-button" type="button" (click)="loadEvents()">Retry</button></div> }
+      @else if (!events().length) { <div class="small-state empty-copy">No events submitted yet.</div> }
+      @else { <ul class="event-list">@for (event of events(); track event.id) { <li><button type="button" class="event-item" [class.selected]="selectedEvent()?.id === event.id" (click)="selectEvent(event)"><span class="event-category">{{ event.category }}</span><strong>{{ event.title }}</strong><small>#{{ event.id }} / {{ event.occurredAtUtc | date:'medium' }}</small></button></li> }</ul>
+        <div class="compact-pagination"><button class="text-button" type="button" [disabled]="eventPage() <= 1" (click)="changeEventPage(eventPage() - 1)">Previous</button><span>{{ eventPage() }} / {{ eventPageCount }}</span><button class="text-button" type="button" [disabled]="eventPage() >= eventPageCount" (click)="changeEventPage(eventPage() + 1)">Next</button></div> }
+    </div>
+    <div class="monitor-column detail-column"><div class="section-title"><div><p class="eyebrow">EVENT DETAIL</p><h2>{{ selectedEvent() ? 'Event #' + selectedEvent()!.id : 'Select an event' }}</h2></div></div>
+      @if (selectedEvent(); as detail) { <div class="event-detail"><span class="event-category">{{ detail.category }}</span><h3>{{ detail.title }}</h3><p class="detail-date">{{ detail.occurredAtUtc | date:'full' }}</p><p class="detail-description">{{ detail.description || 'No description provided.' }}</p></div><h3 class="subheading">Related deliveries</h3>
+        @if (!detail.deliveries.length) { <p class="empty-copy">No alert rules matched this event.</p> } @else { <div class="delivery-list">@for (delivery of detail.deliveries; track delivery.id) { <div class="delivery-row"><span class="delivery-channel">{{ delivery.channel }}</span><span class="delivery-status" [class]="statusClass(delivery.status)">{{ delivery.status }}</span><small>Rule #{{ delivery.alertRuleId }} / {{ delivery.attemptCount }} attempts</small></div> }</div> }
+      } @else { <div class="small-state empty-copy">Choose an event to inspect its details and matching deliveries.</div> }
+    </div>
+    <div class="monitor-column deliveries-column"><div class="section-title delivery-heading"><div><p class="eyebrow">DELIVERY MONITOR</p><h2>Notification deliveries</h2></div><label class="filter-label">Status<select class="filter-select" [value]="selectedStatus()" (change)="changeStatus($event)"><option value="">All statuses</option><option>Pending</option><option>Processing</option><option>Recorded</option><option>Sent</option><option>Failed</option></select></label></div>
+      @if (deliveriesLoading()) { <div class="small-state"><span class="loader"></span>Loading deliveries...</div> }
+      @else if (deliveriesError()) { <div class="small-state api-error" role="alert">{{ deliveriesError() }} <button class="text-button" type="button" (click)="loadDeliveries()">Retry</button></div> }
+      @else if (!deliveries().length) { <div class="small-state empty-copy">No deliveries found for this filter.</div> }
+      @else { <div class="delivery-table-wrap"><table><thead><tr><th>Event</th><th>Rule</th><th>Channel</th><th>Status</th><th>Attempts</th></tr></thead><tbody>@for (delivery of deliveries(); track delivery.id) { <tr><td><button class="text-button" type="button" (click)="selectEventById(delivery.eventId)">#{{ delivery.eventId }}</button></td><td>#{{ delivery.alertRuleId }}</td><td>{{ delivery.channel }}</td><td><span class="delivery-status" [class]="statusClass(delivery.status)">{{ delivery.status }}</span></td><td>{{ delivery.attemptCount }}</td></tr> }</tbody></table></div>
+        <div class="compact-pagination"><span>{{ deliveryTotal() }} total</span><div><button class="text-button" type="button" [disabled]="deliveryPage() <= 1" (click)="changeDeliveryPage(deliveryPage() - 1)">Previous</button><span>{{ deliveryPage() }} / {{ deliveryPageCount }}</span><button class="text-button" type="button" [disabled]="deliveryPage() >= deliveryPageCount" (click)="changeDeliveryPage(deliveryPage() + 1)">Next</button></div></div> }
+    </div>
+  </section>
+}

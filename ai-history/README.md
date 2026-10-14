@@ -9,6 +9,9 @@ This directory preserves the existing summaries and JSON exports and adds readab
 3. [Milestone 2 alert-rule CRUD](transcripts/03-milestone2-alert-rule-crud.md): local archive session `51eccee0-8d45-4248-a429-e3cb0b9ee700`; all 22 prompts and visible Copilot responses are included.
 4. [Milestone 2 event and notification recording](transcripts/04-milestone2-event-and-notification.md): local archive session `d13d300c-5c9f-4826-a3c4-ad2283edccea`; all three prompts and visible Copilot responses are included.
 5. [Milestone 3 notification reliability](transcripts/05-milestone3-notification-reliability.md): local archive session `6abfb731-25fd-44cc-90a5-42fa4314dee7`; the implementation conversation through its final response is included. Its later documentation request is intentionally excluded.
+6. [Milestone 4 Angular MVP - complete recovered conversation](transcripts/07-milestone4-angular-frontend-complete.md): local archive session `4c24146e-91e7-4fff-bb70-2ad82d1c2ded`; all archived developer prompts, visible assistant responses, tool calls/arguments, completion statuses, and five separately saved output payloads are included. The final developer prompt ends mid-sentence in the source archive and is marked as truncated.
+
+The earlier [Milestone 4 transcript excerpt](transcripts/06-milestone4-angular-frontend.md) is preserved as an implementation/smoke summary. The milestone summary is [Milestone 4 Angular MVP](07-milestone4-angular-frontend.md).
 
 ## Existing Foundation History
 
@@ -16,6 +19,7 @@ This directory preserves the existing summaries and JSON exports and adds readab
 - [Implementation plan summary](02-implementation-plan.md) and its preserved [original JSON export](02-implementation-plan.json).
 - [Milestone 1 implementation summary](03-milestone1-implementation.md) and its preserved [original JSON conversation export](03-milestone1-implementation.json).
 - [Milestone 2 CRUD summary](04-milestone2-alert-rule-crud.md), [Milestone 2 event/notification summary](05-milestone2-event-notification.md), and [Milestone 3 reliability summary](06-milestone3-notification-reliability.md).
+- [Milestone 4 Angular MVP summary](07-milestone4-angular-frontend.md) references the complete recovered conversation above.
 
 ## Recovery Limits
 
@@ -23,5 +27,6 @@ This directory preserves the existing summaries and JSON exports and adds readab
 - Milestone 2 prompt and visible-response content was recovered from the local transcript archive, not from repository JSON exports. The archive includes tool names, arguments, and completion status, but not detailed tool stdout/result payloads. Manual export from VS Code is still required for complete raw tool results.
 - Milestone 3 prompt and visible-response content was recovered from the local transcript archive. Its detailed validation results available in the active conversation are recorded in the transcript appendix; other raw tool result payloads are absent from the archive and require manual export for full fidelity.
 - The initial Milestone 1 session is preserved only in the local archive; its detailed tool output payloads are incomplete. Manual export is needed if those results must be retained verbatim.
+- The Milestone 4 archive contains exact developer messages, visible assistant message text, tool invocation arguments, and execution success/failure status. Most tool completion records do not contain stdout/result bodies; the five full payloads retained in local session resources are embedded. The final developer message is truncated after "Review the staged" in the source archive; no missing instruction text has been reconstructed.
 
 No original JSON files or existing summaries were replaced.

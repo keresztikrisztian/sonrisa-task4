@@ -41,9 +41,7 @@ The project follows an iterative, AI-assisted development process:
 
 ## Current Status
 
-Initial project scaffolding completed.
-
-The backend and frontend projects have been generated. Business requirements, event processing, and notification functionality are not yet implemented.
+The MVP now includes the ASP.NET Core API and an Angular interface for demo identity selection, user alert-rule management, admin event submission, and notification delivery monitoring. Demo identity headers are for local demonstrations only and are not production authentication.
 
 ## Evaluation Focus
 

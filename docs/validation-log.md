@@ -183,3 +183,49 @@ Evidence summary: [`ai-history/05-milestone2-event-notification.md`](../ai-histo
 - Frontend behavior was not changed or validated.
 
 Evidence summary: [`ai-history/06-milestone3-notification-reliability.md`](../ai-history/06-milestone3-notification-reliability.md). This is a factual implementation summary, not a reconstructed transcript.
+
+## Milestone 4 Angular Frontend
+
+### Scope and Implementation
+
+- Replaced the generated root welcome screen with a standalone routed shell and responsive user/admin views, following the existing Angular 22, signals, reactive forms, and Vitest configuration. No runtime dependencies were added.
+- Added typed API DTOs and an API service for demo identities, paginated alert rules, events, event detail/submission, and notification deliveries. The functional HTTP interceptor adds the selected `X-Demo-Identity` to same-origin `/api/` requests.
+- Demo identity options are loaded from `GET /api/demo-identities`; the selected ID is restored from and persisted to local storage. The user view supports paginated list/create/edit/enable/disable/logical delete. The admin view supports event submission/list/detail and status-filtered delivery monitoring with manual refresh.
+- Form validation follows backend field limits, required fields, keyword constraints, allowed channels, and the API's allowance for an empty event description. API loading, empty, validation, and request-error states are represented separately.
+- Added a development-only Angular proxy to the existing HTTPS API profile, local startup/migration instructions, and a Milestone 4 transcript. Backend code and accepted ADRs were not modified.
+
+### Validation
+
+- `cd frontend; npm test -- --watch=false`: **6 passed, 0 failed** across three Vitest files, covering saved identity restoration, identity headers, rule empty state and validation, empty event descriptions, and `Recorded`/`Sent`/`Failed` status presentation.
+- `cd frontend; npm run build`: succeeded. Angular reports style budget warnings for the rules page stylesheet (4.61 kB vs 4.00 kB) and admin page stylesheet (5.98 kB vs 4.00 kB); these remain below the configured 8.00 kB errors.
+- Browser smoke check at `http://localhost:4200`: the default user identity rendered the rules empty state; switching to Demo Administrator exposed `/admin`, the event form, and empty event/delivery monitoring through the API proxy.
+- `dotnet test backend/Sonrisa.EventAlertSystem.slnx`: **116 succeeded, 0 failed, 0 skipped**.
+- `dotnet build backend/Sonrisa.EventAlertSystem.slnx`: succeeded.
+- `dotnet ef database update` was applied to the previously absent local demo SQLite database using the existing `20261013220534_InitialCreate` migration. This was local runtime state only; no migration source was added or changed.
+- `git diff --check` passed. Git emitted only a line-ending warning for the already-modified `ai-history/transcripts/05-milestone3-notification-reliability.md`, which was preserved.
+- No commit or push was made.
+
+### Final End-to-End Smoke Check and Commit Readiness
+
+- Created user rule `Milestone 4 smoke` as `demo-user`: category `Transport`, keyword `smokeprobe`, channels Email and Slack, enabled. The actual `POST /api/alert-rules` carried `X-Demo-Identity: demo-user` and returned the rule with both channels.
+- Switched to `demo-admin` and submitted event `smokeprobe transit alert` in category `Transport`. `POST /api/events` carried `X-Demo-Identity: demo-admin` and returned `201 Created`, event ID 1, `isDuplicate: false`.
+- The admin event list showed event 1. Its detail and delivery monitor showed exactly two matching delivery rows: one Slack and one Email, both initially Pending. After worker processing and a UI refresh, both showed `Recorded`, attempt count 1; the delivery monitor total was 2, with no failed rows.
+- Switched back to `demo-user`, edited the rule name to `Milestone 4 smoke edited` (`PUT` returned 200), paused it (list showed Paused), re-enabled it (list showed Enabled), then confirmed logical deletion. The user list returned to its empty state. Switching to admin confirmed both historical Recorded delivery rows remained visible after deletion.
+- No application functional defect was confirmed. The integrated browser automation's synthetic pointer click dispatched click handlers but did not perform native HTML checkbox activation or submit activation; invoking native form `requestSubmit()` exercised the Angular submit handler and real API POST/PUT successfully. This is an automation interaction limitation, not evidence of a user-facing browser defect.
+- Moved common layout/button/state/section-heading styles to global CSS. Final `npm run build` succeeded with **no stylesheet budget warnings**; the configured 4 kB warning and 8 kB error budgets were not changed and no dependency was added.
+- Final frontend validation: `npm test -- --watch=false` passed, **6 tests across 3 files**. Final backend validation: `dotnet test backend/Sonrisa.EventAlertSystem.slnx` passed, **116 succeeded, 0 failed, 0 skipped**; `dotnet build backend/Sonrisa.EventAlertSystem.slnx` succeeded.
+- Final `git diff --check` passed. Full staged, unstaged, and untracked candidate inventory was reviewed. Nothing was staged, committed, or pushed. The existing user-modified Milestone 3 transcript was preserved.
+
+### Remaining Risks and Limitations
+
+- Demo identity selection and `X-Demo-Identity` are explicitly for local demonstration, not production authentication. The dev proxy also disables certificate validation for the local backend certificate only.
+- The notification delivery DTOs currently expose channel, rule/event IDs, status, attempts, and timestamps but not `LastError`; the UI cannot display a backend field that is not in the API contract. Status distinguishes simulated `Recorded` from live `Sent`.
+- The production frontend build succeeds with the component-style budget warnings listed above. No end-to-end automation was added; the browser check was manual.
+
+Evidence: [Milestone 4 summary](../ai-history/07-milestone4-angular-frontend.md), [complete recovered conversation](../ai-history/transcripts/07-milestone4-angular-frontend-complete.md), and the preserved [earlier transcript excerpt](../ai-history/transcripts/06-milestone4-angular-frontend.md).
+
+### Finalization Revalidation
+
+- Re-ran Angular validation after recovering the history: `npm test -- --watch=false` passed (**6 tests, 3 files**) and `npm run build` succeeded without component stylesheet budget warnings.
+- The first fresh full backend test run had one transient failure in `PermanentFailure_IsTerminalWithoutRetry`: `ObjectDisposedException` from the test helper's service-provider scope while polling. The isolated test passed. The full `NotificationDeliveryRecordingWorkerTests` class then passed **five consecutive runs**, each **6/6**; a subsequent full solution test passed **116/116**, 0 failed, 0 skipped.
+- No backend source or test files were modified during investigation. The backend solution build succeeded in the green full-suite run and earlier explicit build validation.

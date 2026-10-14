@@ -1,1 +1,36 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root { color-scheme: light; font-family: 'DM Sans', 'Trebuchet MS', sans-serif; color: #253d36; background: #fbfcf8; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; --green-900: #123a35; --green-700: #245d51; --gold-500: #d5a746; }
+* { box-sizing: border-box; }
+body { min-width: 320px; min-height: 100vh; margin: 0; background: radial-gradient(ellipse at 92% 14%, rgb(220 233 220 / 30%), transparent 30%), #fbfcf8; }
+button, input, textarea, select { font: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid #bd8e33; outline-offset: 2px; }
+
+.page-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+.eyebrow { margin: 0 0 8px; color: #a07423; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; }
+h1 { margin: 0 0 8px; color: #193b35; font: 500 37px Georgia, serif; }
+.lede { margin: 0; color: #63736e; font-size: 14px; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 0 13px; border: 1px solid transparent; border-radius: 3px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.button:disabled { opacity: .48; cursor: not-allowed; }
+.button-primary { color: white; background: #245d51; border-color: #245d51; }
+.button-primary:hover:not(:disabled) { background: #17483e; }
+.button-secondary { color: #22564c; background: white; border-color: #b9cbc4; }
+.button-quiet { color: #36564f; background: transparent; border-color: #d8e0dc; }
+.button-quiet:hover:not(:disabled) { background: #f1f5f1; }
+.button-danger-quiet { color: #9b4e42; background: transparent; border-color: #e6d5d0; }
+.error-banner { margin-bottom: 14px; padding: 11px 13px; color: #7c352b; background: #f9e9e4; border-left: 3px solid #ba6957; font-size: 13px; }
+.state-panel { display: grid; justify-items: center; gap: 9px; min-height: 250px; padding: 35px 20px; text-align: center; background: #f5f7f2; border: 1px solid #dce4dd; }
+.state-panel h2 { margin: 0; color: #22483f; font: 500 22px Georgia, serif; }
+.state-panel p { max-width: 390px; margin: 0 0 8px; color: #687771; font-size: 13px; line-height: 1.6; }
+.state-icon { color: #b58c3b; font: 34px Georgia, serif; }
+.loader { width: 24px; height: 24px; border: 2px solid #cbd9d1; border-top-color: #2d6b5c; border-radius: 50%; animation: sonora-spin .8s linear infinite; }
+@keyframes sonora-spin { to { transform: rotate(360deg); } }
+.text-button { padding: 3px 2px; color: #286254; background: transparent; border: 0; font: inherit; cursor: pointer; }
+.text-button:disabled { color: #9ba6a0; cursor: not-allowed; }
+.compact-pagination { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; color: #738079; font-size: 10px; }
+.compact-pagination > div { display: flex; align-items: center; gap: 10px; }
+.small-state { display: flex; align-items: center; gap: 9px; min-height: 80px; color: #718078; font-size: 12px; }
+.empty-copy { color: #78847d; font-size: 12px; }
+.section-title { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+.section-title h2 { margin: 0; color: #23483f; font: 500 21px Georgia, serif; }
+.section-title .eyebrow { margin-bottom: 5px; }

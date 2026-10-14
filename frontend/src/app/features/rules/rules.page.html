@@ -1,0 +1,28 @@
+<section class="page-heading"><div><p class="eyebrow">PERSONAL ALERTS</p><h1>My rules</h1><p class="lede">Choose the signals worth bringing to your attention.</p></div>@if (identity.current()?.role === 'User') { <button class="button button-primary" type="button" (click)="openCreate()">New rule</button> }</section>
+@if (identity.loading()) { <section class="state-panel"><span class="loader"></span><p>Loading demo identities...</p></section> }
+@else if (!identity.current()) { <section class="state-panel" role="status"><h2>No demo identity available</h2><p>Start the backend and reload to choose an identity.</p></section> }
+@else if (identity.current()?.role !== 'User') { <section class="state-panel"><span class="state-icon">User</span><h2>Rules are managed as a demo user</h2><p>Switch to Demo User to create and manage personal alert rules.</p></section> }
+@else {
+  @if (error()) { <div class="error-banner" role="alert">{{ error() }}</div> }
+  @if (loading()) { <section class="state-panel"><span class="loader"></span><p>Loading your rules...</p></section> }
+  @else if (error()) { <section class="state-panel"><h2>Rules could not be loaded</h2><p>Check the API response above and try again.</p><button class="button button-secondary" type="button" (click)="loadRules()">Try again</button></section> }
+  @else if (!rules().length) { <section class="state-panel empty-state"><span class="state-icon">-</span><h2>No alert rules yet</h2><p>Create a rule to start watching for events that match your interests.</p><button class="button button-secondary" type="button" (click)="openCreate()">Create your first rule</button></section> }
+  @else {
+    <section class="rule-list" aria-label="Alert rules">
+      @for (rule of rules(); track rule.id) { <article class="rule-row"><div class="rule-main"><div class="rule-title-line"><h2>{{ rule.name }}</h2><span class="status" [class.status-muted]="!rule.isEnabled">{{ rule.isEnabled ? 'Enabled' : 'Paused' }}</span></div><p class="rule-meta">{{ rule.category || 'Any category' }} <span aria-hidden="true">/</span> {{ rule.keywords.length ? rule.keywords.join(', ') : 'Any keyword' }}</p><div class="tag-row">@for (channel of rule.channels; track channel) { <span class="tag">{{ channel }}</span> } @if (!rule.channels.length) { <span class="tag tag-empty">No channels</span> }</div></div><div class="row-actions"><button class="button button-quiet" type="button" (click)="openEdit(rule)">Edit</button><button class="button button-quiet" type="button" [disabled]="busyRuleId() === rule.id" (click)="toggleRule(rule)">{{ rule.isEnabled ? 'Pause' : 'Enable' }}</button><button class="button button-danger-quiet" type="button" [disabled]="busyRuleId() === rule.id" (click)="deleteRule(rule)" [attr.aria-label]="'Delete ' + rule.name">Delete</button></div></article> }
+    </section>
+    <div class="pagination"><span>{{ totalCount() }} {{ totalCount() === 1 ? 'rule' : 'rules' }}</span><div><button class="button button-quiet" type="button" [disabled]="page() <= 1" (click)="changePage(page() - 1)">Previous</button><span>Page {{ page() }} of {{ pageCount }}</span><button class="button button-quiet" type="button" [disabled]="page() >= pageCount" (click)="changePage(page() + 1)">Next</button></div></div>
+  }
+}
+@if (editorOpen()) { <div class="modal-backdrop" (click)="$event.target === $event.currentTarget && editorOpen.set(false)"><section class="editor" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+  <header><div><p class="eyebrow">RULE SETUP</p><h2 id="editor-title">{{ editing() ? 'Edit rule' : 'New alert rule' }}</h2></div><button class="icon-button" type="button" aria-label="Close" (click)="editorOpen.set(false)">×</button></header>
+  @if (error()) { <div class="error-banner" role="alert">{{ error() }}</div> }
+  <form [formGroup]="form" (ngSubmit)="saveRule()" novalidate>
+    <label class="field">Rule name<input formControlName="name" maxlength="120" placeholder="e.g. Road closures near me" autocomplete="off"><small class="field-error">@if (hasError('name', 'required')) { Enter a name. } @else if (hasError('name', 'maxlength')) { Use 120 characters or fewer. }</small></label>
+    <label class="field">Category<input formControlName="category" maxlength="100" placeholder="Leave blank to match any category"><small class="field-hint">Optional · up to 100 characters</small></label>
+    <label class="field">Keywords<textarea formControlName="keywords" rows="4" placeholder="One keyword per line"></textarea><small class="field-hint">Optional · any keyword matches · 100 characters each</small><small class="field-error">@if (hasError('keywords', 'invalidKeywords')) { Remove duplicate keywords and keep each under 100 characters. }</small></label>
+    <fieldset class="channel-options"><legend>Delivery channels</legend><label><input type="checkbox" formControlName="email"> Email</label><label><input type="checkbox" formControlName="slack"> Slack</label></fieldset>
+    <label class="toggle-field"><input type="checkbox" formControlName="isEnabled"><span>Rule enabled</span></label>
+    <footer><button class="button button-quiet" type="button" (click)="editorOpen.set(false)">Cancel</button><button class="button button-primary" type="submit" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save rule' }}</button></footer>
+  </form>
+</section></div> }

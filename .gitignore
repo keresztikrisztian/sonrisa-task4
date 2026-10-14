@@ -8,6 +8,7 @@
 *.suo
 **/TestResults/
 **/coverage/
+backend/Sonrisa.EventAlertSystem.Api/sonrisa-event-alerts.db*
 
 # ==================================
 # Angular / Node.js
